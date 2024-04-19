@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- META -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="uisual" content="Made with Uisual (uisual.com)">
+    <meta name="author" content="#">
+    <meta name="description" content="#">
+    <meta name="referrer" content="unsafe-url">
+    <meta name="robots" content="index, follow">
+    <!-- SPEED -->
+    <link rel="preconnect" href="https://res.cloudinary.com">
+    <link rel="dns-prefetch" href="https://res.cloudinary.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <!-- LINK -->
+
+    <link rel="me" href="#">
+    <link rel="canonical" href="#">
+    <link rel="icon" type="image/png" href="#" sizes="48x48">
+    <!-- PERFORMANCE -->
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="coloris.min.css" />
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">
+    <link rel="preload" as="style" href="style.css">
+    <link rel="stylesheet" href="style.css">
+    <!-- TITLE -->
+    <title>About</title>
+  </head>
+<body>
+  <script src="navbar.js"></script>
+  <nav id="navbar" class="">
+    <div class="nav-wrapper">
+      <!-- Navbar Links -->
+      <ul id="menu">
+        <li><a href="/index.html">Home</a></li>
+        <li><a href="/demo.html">Demo</a></li>
+        <li><a href="/about.html">About</a></li>
+        <li><a href="/video.html">Video</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Menu Icon -->
+  <div class="menuIcon">
+    <span class="icon icon-bars"></span>
+    <span class="icon icon-bars overlay"></span>
+  </div>
+
+  <div class="overlay-menu">
+    <ul id="menu">
+      <li><a href="/index.html">Home</a></li>
+      <li><a href="/demo.html">Demo</a></li>
+      <li><a href="/about.html">About</a></li>
+      <li><a href="/video.html">Video</a></li>
+    </ul>
+  </div>
+
+  <main role="main">
+    <section class="ui-section-hero">
+        <div class="ui-layout-container">
+            <!-- Overview -->
+            <div class="ui-layout-column-12">
+                <h2>Overview</h2>
+                <p class="ui-text-about">
+                    Computational geometry plays a pivotal role in addressing challenges related to procedural terrain generation, 
+                    a field of study with applications ranging from video games to virtual simulations and geographic information systems. 
+                    The intersection of computational geometry with procedural terrain generation involves the mathematical 
+                    representation and manipulation of geometric structures to create realistic and visually compelling landscapes. 
+                    The utilization of Perlin noise, a gradient noise function developed by Ken Perlin, and fractals introduces a 
+                    layer of complexity and natural randomness to the generated terrains. Perlin noise, renowned for its ability to 
+                    produce smooth and coherent patterns, is employed to simulate realistic terrain features such as 
+                    mountains, valleys, and plains. Fractals, on the other hand, contribute to the intricate 
+                    detail and self-similarity observed in natural landscapes. 
+                </p>
+            </div>
+            <br><br>
+    
+            <!-- Motivation -->
+            <div class="ui-layout-column-12">
+                <h2>Motivation</h2>
+                <p class="ui-text-about">
+                    The motivation behind this project stems from a desire to understand and implement sophisticated algorithms for terrain generation.
+                    I've always enjoyed open-world games with vast environments and wanted to delve a bit into the algorithmic side of how terrain was actually generated.
+                    Most games use engines to streamline the process such as unity or ue4, however the underlying process for how this terrain is formed that these
+                    engines use is a fundamental aspect rooted in computational geometry. By exploring procedural terrain generation using 
+                    Perlin noise and fractals, I aim to demystify the intricate processes that underpin virtual landscapes and gain insights 
+                    into the algorithms shaping these expansive environments. This project not only satisfies a personal curiosity about the 
+                    inner workings of terrain generation but also serves as a practical exploration of computational geometry principles.
+                </p>
+            </div>
+            <br><br>
+    
+<!-- Approach -->
+<div class="ui-layout-column-12">
+    <h2>Approach</h2>
+    <p class="ui-text-about">
+        My approach involves the utilization of Perlin Noise for height map generation, enabling us to create intricate landscapes. The implementation includes 2D and 3D Simplex Noise, Perlin Noise, and essential functions like Fade and Lerp. Additionally, we explore the dynamic rendering of terrain using Level of Detail (LOD) management, allowing for real-time updates and efficient rendering.
+    </p>
+
+    <!-- Pseudocode Container -->
+    <div class="ui-pseudocode-container">
+        <pre>
+            <code>
+function Grad(x, y, z):
+    return new Grad with x, y, z
+
+Grad.prototype.dot2(x, y):
+    return this.x * x + this.y * y
+
+Grad.prototype.dot3(x, y, z):
+    return this.x * x + this.y * y + this.z * z
+
+grad3 = [Grad(1,1,0), Grad(-1,1,0), ..., Grad(0,-1,-1)]
+
+p = [151,160,137,...,180]
+
+perm = new Array(512)
+gradP = new Array(512)
+
+function seed(seed):
+    seed = Math.floor(seed)
+    if seed < 256:
+        seed |= seed << 8
+    for i = 0 to 255:
+        v = p[i] ^ (seed & 255) if i & 1 else p[i] ^ ((seed >> 8) & 255)
+        perm[i] = perm[i + 256] = v
+        gradP[i] = gradP[i + 256] = grad3[v % 12]
+
+seed(0)
+
+F2 = 0.5 * (Math.sqrt(3) - 1)
+G2 = (3 - Math.sqrt(3)) / 6
+
+function simplex2(xin, yin):
+    s = (xin + yin) * F2
+    i = floor(xin + s)
+    j = floor(yin + s)
+    t = (i + j) * G2
+    x0 = xin - i + t
+    y0 = yin - j + t
+    i1, j1 = 0, 0
+    if x0 > y0:
+        i1, j1 = 1, 0
+    else:
+        i1, j1 = 0, 1
+    x1 = x0 - i1 + G2
+    y1 = y0 - j1 + G2
+    x2 = x0 - 1 + 2 * G2
+    y2 = y0 - 1 + 2 * G2
+    i &= 255
+    j &= 255
+    gi0 = gradP[i + perm[j]]
+    gi1 = gradP[i + i1 + perm[j + j1]]
+    gi2 = gradP[i + 1 + perm[j + 1]]
+    t0 = 0.5 - x0 * x0 - y0 * y0
+    n0 = 0 if t0 < 0 else t0 * t0 * t0 * t0 * gi0.dot2(x0, y0)
+    t1 = 0.5 - x1 * x1 - y1 * y1
+    n1 = 0 if t1 < 0 else t1 * t1 * t1 * t1 * gi1.dot2(x1, y1)
+    t2 = 0.5 - x2 * x2 - y2 * y2
+    n2 = 0 if t2 < 0 else t2 * t2 * t2 * t2 * gi2.dot2(x2, y2)
+    return 70 * (n0 + n1 + n2)
+            </code>
+        </pre>
+    </div>
+</div>
+    </section>
+    <section class="ui-section-timeline">
+        <div class="ui-layout-container">
+            <div class="ui-layout-column-12 ui-layout-column-center">
+                <h2>Timeline</h2>
+            </div>
+            <div class="ui-section-timeline__layout ui-layout-grid ui-layout-grid-1">
+                <table class="timeline-table">
+                    <thead>
+                        <tr>
+                            <th class="week-no">Week No</th>
+                            <th class="goals">Goals</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Week 4</td>
+                            <td>Gather more materials, create an environment (webpage to start). Generally think about how I'll implement this project and which language provides the best support to do so.</td>
+                        </tr>
+                        <tr>
+                            <td>Week 5</td>
+                            <td>Start implementation of the model with some basic testing (this will be the week where I really figure out the route I will go to develop this model).</td>
+                        </tr>
+                        <tr>
+                            <td>Week 6</td>
+                            <td>Refine the model based on initial tests. Also prepare for class explanations.</td>
+                        </tr>
+                        <tr>
+                            <td>Week 7</td>
+                            <td>Work on visual representation and rendering. (I think I’ll probably mess around with three.js for some cool 3D rendering on the webpage.)</td>
+                        </tr>
+                        <tr>
+                            <td>Week 8</td>
+                            <td>Final testing, debugging, and documentation.</td>
+                        </tr>
+                        <tr>
+                            <td>Week 9</td>
+                            <td>Project completion, final documentation, and submission.</td>
+                        </tr>
+                        <tr>
+                            <td>Week 10-14</td>
+                            <td>If not complete by week 9, finishing up in these following weeks.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+  </main>
+  
+  <footer role="contentinfo" class="ui-section-footer">
+    <div class="ui-layout-container">
+      <div class="ui-section-footer__layout ui-layout-flex">
+        <!-- COPYRIGHT -->
+        <p class="ui-section-footer--copyright ui-text-note"><small>CSCI-716: Computational Geometry</small></p>        
+        <!-- LINKS -->
+        <nav role="navigation" class="ui-section-footer--nav ui-section-footer--social ui-layout-flex">
+          <a href="/index.html" role="link" aria-label="#" class="ui-text-note"><small>Home</small></a>
+          <a href="/demo.html" role="link" aria-label="#" class="ui-text-note"><small>Demo</small></a>
+          <a href="/about.html" role="link" aria-label="#" class="ui-text-note"><small>About</small></a>
+          <a href="/code.html" role="link" aria-label="#" class="ui-text-note"><small>Code</small></a>
+          </a>
+        </nav>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
+
+

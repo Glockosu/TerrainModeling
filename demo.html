@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="main.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Procedural Terrain CS716</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.js"></script>
+  <script src="lib/perlin.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/numjs/0.14.2/numjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/87/three.min.js"></script>
+  <!-- No need for Coloris-related scripts and styles -->
+  <script type="text/javascript">
+    window.onerror = function (msg, url, line, col, error) {
+      document.getElementById('error-message').innerText = `${msg } : ${line}`;
+    }
+
+    function updateTerrainSettings() {
+      // Retrieve values from sliders
+      let gridScale = parseFloat(document.getElementById('grid-scale').value);
+      let noiseScale = parseFloat(document.getElementById('noise-scale').value);
+      let octaves = parseFloat(document.getElementById('octaves').value);
+      let lacunarity = parseFloat(document.getElementById('lacunarity').value);
+      let persistence = parseFloat(document.getElementById('persistence').value);
+
+      function pauseScene() {
+        // Add code to pause your Three.js scene
+        // For example, if 'terrain' is your scene, you might do:
+        terrain.paused = true; // You should implement the 'paused' property in your Three.js scene
+      }
+
+      // Function to resume the scene
+      function resumeScene() {
+        // Add code to resume your Three.js scene
+        // For example, if 'terrain' is your scene, you might do:
+        terrain.paused = false;
+      }
+
+      // Update terrain settings
+      terrain.gridScale = gridScale;
+      terrain.noiseScale = noiseScale;
+      terrain.octaves = octaves;
+      terrain.lacunarity = lacunarity;
+      terrain.persistence = persistence;
+
+      // Update displayed values next to sliders
+      document.getElementById('grid-scale-value').value = gridScale;
+      document.getElementById('noise-scale-value').value = noiseScale;
+      document.getElementById('octaves-value').value = octaves;
+      document.getElementById('lacunarity-value').value = lacunarity;
+      document.getElementById('persistence-value').value = persistence;
+
+      const sliders = ['grid-scale', 'noise-scale', 'octaves', 'lacunarity', 'persistence'];
+
+      sliders.forEach(sliderId => {
+        const sliderInput = document.getElementById(sliderId);
+        const valueBox = document.getElementById(`${sliderId}-value`);
+
+        // Attach event listeners to each text box
+        valueBox.addEventListener('focus', pauseScene);
+        valueBox.addEventListener('blur', resumeScene);
+
+        // Update the slider and value box when the slider is moved
+        sliderInput.addEventListener('input', function () {
+          const sliderValue = parseFloat(sliderInput.value);
+          valueBox.value = sliderValue;
+          // Update other UI elements if needed
+
+          // Update the Three.js scene settings
+          updateTerrainSettings();
+        });
+      });
+    }
+
+    // Mountains
+    // let r1 = 93, g1 = 71, b1 = 49;
+    // let r2 = 35, g2 = 75, b2 = 44;
+    // let r3 = 154, g3 = 184, b3 = 72;
+    // let r4 = 220, g4 = 232, b4 = 255;
+    // let r5 = 255, g5 = 255, b5 = 255;
+
+    // Desert Biome
+    // r1 = 255, g1 = 195, b1 = 145;        // Light orange
+    // r2 = 255, g2 = 165, b2 = 79;         // Light orange
+    // r3 = 233, g3 = 252, b3 = 252;         // Pastel orange
+    // r4 = 252, g4 = 179, b4 = 130;        // Light brown
+    // r5 = 255, g5 = 255, b5 = 255;        // White
+
+    // Tropical Rainforest
+    // r1 = 79, g1 = 69, b1 = 60;          // Dark green
+    // r2 = 50, g2 = 76, b2 = 46;           // Deep green
+    // r3 = 108, g3 = 140, b3 = 86;         // Pastel green
+    // r4 = 143, g4 = 175, b4 = 80;        // Light green
+    // r5 = 255, g5 = 255, b5 = 255;        // White
+
+    // Savannah Biome
+    // r1 = 218, g1 = 179, b1 = 122;        // Light brown
+    // r2 = 193, g2 = 100, b2 = 101;        // Light brown
+    // r3 = 255, g3 = 180, b3 = 152;        // Pastel yellow
+    // r4 = 240, g4 = 250, b4 = 144;        // Light brown
+    // r5 = 255, g5 = 255, b5 = 255;        // White
+
+    // Arctic Tundra
+    r1 = 252, g1 = 174, b1 = 229;        // Light blue
+    r2 = 150, g2 = 192, b2 = 213;        // Light blue
+    r3 = 252, g3 = 252, b3 = 252;        // Pastel blue
+    r4 = 173, g4 = 204, b4 = 228;        // Very light blue
+    r5 = 255, g5 = 255, b5 = 255;        // White
+
+    // Mediterranean Scrub
+    // r1 = 142, g1 = 177, b1 = 128;        // Pastel green
+    // r2 = 252, g2 = 156, b2 = 105;        // Pastel green
+    // r3 = 164, g3 = 196, b3 = 148;        // Very light green
+    // r4 = 154, g4 = 219, b4 = 173;        // Very light green
+    // r5 = 255, g5 = 255, b5 = 255;        // White
+
+    // Boreal Forest
+    // r1 = 98, g1 = 128, b1 = 103;         // Dark green
+    // r2 = 105, g2 = 104, b2 = 78;          // Deep green
+    // r3 = 82, g3 = 145, b3 = 154;        // Pastel green
+    // r4 = 107, g4 = 179, b4 = 203;        // Very light green
+    // r5 = 255, g5 = 255, b5 = 255;        // White
+
+    // Grassland Biome
+    // r1 = 7, g1 = 20, b1 = 137;        // Light green
+    // r2 = 133, g2 = 105, b2 = 109;        // Pastel green
+    // r3 = 178, g3 = 217, b3 = 161;        // Very light green
+    // r4 = 202, g4 = 236, b4 = 188;        // Very light green
+    // r5 = 255, g5 = 255, b5 = 255;        // White
+
+
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Your other initialization code here...
+
+        document.getElementById('color1').value = `${r1},${g1},${b1}`;
+        document.getElementById('color2').value = `${r2},${g2},${b2}`;
+        document.getElementById('color3').value = `${r3},${g3},${b3}`;
+        document.getElementById('color4').value = `${r4},${g4},${b4}`;
+        document.getElementById('color5').value = `${r5},${g5},${b5}`;
+
+        // Add event listener for "keydown" on text input boxes
+        const colorInputs = document.querySelectorAll('.color-button');
+        colorInputs.forEach(input => {
+        input.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+            // Set activeColorButton before applying color values
+            activeColorButton = input;
+            applyColorValues(input);
+            }
+        });
+        });
+    });
+
+    const colorButtons = document.querySelectorAll('.color-button');
+    const colorPickerContainer = document.getElementById('color-picker-container');
+    const colorPickerInput = document.getElementById('color-picker-input');
+    const colorPickerConfirm = document.getElementById('color-picker-confirm');
+
+    let activeColorButton;
+
+    // Function to show the color picker
+    function showColorPicker(button) {
+        activeColorButton = button;
+
+        // Get the RGB value from the text input
+        const rgbValues = activeColorButton.value.split(',').map(Number);
+
+        // Set the Coloris input value to the RGB value
+        colorPickerInput.value = rgbValues.join(',');
+
+        // Show the color picker
+        colorPickerContainer.style.display = 'block';
+    }
+
+    // Function to apply color values from the text input
+    function applyColorValues(input) {
+      const rgbValues = input.value.split(',').map(Number);
+
+      // Update RGB variables based on the active color button
+      switch (activeColorButton.id) {
+        case 'color1':
+          [r1, g1, b1] = rgbValues;
+          colorRGBValues.r1 = r1;
+          colorRGBValues.g1 = g1;
+          colorRGBValues.b1 = b1;
+          break;
+        case 'color2':
+          [r2, g2, b2] = rgbValues;
+          colorRGBValues.r2 = r2;
+          colorRGBValues.g2 = g2;
+          colorRGBValues.b2 = b2;
+          break;
+        case 'color3':
+          [r3, g3, b3] = rgbValues;
+          colorRGBValues.r3 = r3;
+          colorRGBValues.g3 = g3;
+          colorRGBValues.b3 = b3;
+          break;
+        case 'color4':
+          [r4, g4, b4] = rgbValues;
+          colorRGBValues.r4 = r4;
+          colorRGBValues.g4 = g4;
+          colorRGBValues.b4 = b4;
+          break;
+        case 'color5':
+          [r5, g5, b5] = rgbValues;
+          colorRGBValues.r5 = r5;
+          colorRGBValues.g5 = g5;
+          colorRGBValues.b5 = b5;
+          break;
+        default:
+          break;
+      }
+
+      // Additional code to update the Three.js scene settings if needed
+      updateTerrainSettings();
+    }
+
+    // Event listener for "keydown" on text input boxes
+    const colorInputs = document.querySelectorAll('.color-button');
+    colorInputs.forEach(input => {
+        input.addEventListener('keydown', function (event) {
+        if (event.key === 'S') {
+            // Apply color values on Enter
+            applyColorValues(input);
+            newGradient(r1, g1, b1, r2, g2, b2, r3, g3, b3, r4, g4, b4, r5, g5, b5);
+
+            // Remove focus from the input to signify that changes have been applied
+            input.blur();
+        }
+        });
+    });
+    </script>
+  <script src="navbar.js"></script>
+  <nav id="navbar" class="">
+    <div class="nav-wrapper">
+      <!-- Navbar Links -->
+      <ul id="menu">
+        <li><a href="/index.html">Home</a></li><!--
+     --><li><a href="/demo.html">Demo</a></li><!--
+     --><li><a href="/about.html">About</a></li><!--
+     --><li><a href="/video.html">Video</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Menu Icon -->
+  <div class="menuIcon">
+    <span class="icon icon-bars"></span>
+    <span class="icon icon-bars overlay"></span>
+  </div>
+
+  <div class="overlay-menu">
+    <ul id="menu">
+      <li><a href="/index.html">Home</a></li>
+      <li><a href="/demo.html">Demo</a></li>
+      <li><a href="/about.html">About</a></li>
+      <li><a href="/video.html">Video</a></li>
+    </ul>
+  </div>
+
+  <div id="canvas-container" class="frame">
+  </div>
+  <div id="error-message"></div>
+
+  <!-- Add sliders for other terrain settings -->
+  <div id="sliders-container">
+    <h2> Settings</h2>
+    <br>
+    <div class="slider-container">
+      <label for="grid-scale" class="slider-label">Scale</label>
+      <input type="range" id="grid-scale" min="100" max="300" value="200" oninput="updateTerrainSettings()">
+      <div class="value-container">
+        <input type="text" id="grid-scale-value">
+      </div>
+    </div>
+    <div class="slider-container">
+      <label for="noise-scale" class="slider-label">Noise</label>
+      <input type="range" id="noise-scale" min="0.001" max="0.05" value="0.015" step="0.001" oninput="updateTerrainSettings()">
+      <div class="value-container">
+        <input type="text" id="noise-scale-value">
+      </div>
+    </div>
+    <div class="slider-container">
+      <label for="octaves" class="slider-label">Octaves</label>
+      <input type="range" id="octaves" min="1" max="20" value="10" oninput="updateTerrainSettings()">
+      <div class="value-container">
+        <input type="text" id="octaves-value">
+      </div>
+    </div>
+    <div class="slider-container">
+      <label for="lacunarity">Lacunarity</label>
+      <input type="range" id="lacunarity" min="1" max="5" value="2" step="0.1" oninput="updateTerrainSettings()">
+      <div class="value-container">
+        <input type="text" id="lacunarity-value">
+      </div>
+    </div>
+    <div class="slider-container">
+      <label for="persistence">Persist</label>
+      <input type="range" id="persistence" min="0.1" max="1" value="0.5 " step="0.1" oninput="updateTerrainSettings()">
+      <div class="value-container">
+        <input type="text" id="persistence-value">
+      </div>
+    </div>
+  </div>
+  <div id="sliders-container2">
+    <h2> Color Settings</h2>
+    <div id="color-settings" class="color-container">
+      <div class="color-slider">
+        <label for="color1">Color 1:</label>
+        <input type="text" id="color1" class="color-button"/>
+      </div>
+      <div class="color-slider">
+        <label for="color2">Color 2:</label>
+        <input type="text" id="color2" class="color-button"/>
+      </div>
+      <div class="color-slider">
+        <label for="color3">Color 3:</label>
+        <input type="text" id="color3" class="color-button"/>
+      </div>
+      <div class="color-slider">
+        <label for="color4">Color 4:</label>
+        <input type="text" id="color4" class="color-button"/>
+      </div>
+      <div class="color-slider">
+        <label for="color5">Color 5:</label>
+        <input type="text" id="color5" class="color-button"/>
+      </div>
+    </div>
+  </div>
+  <script src="Terrain.js"></script>
+  <script src="PointerLockControls.js"></script>
+  <script src="main.js"></script>
+</body>
+
+</html>
